@@ -151,13 +151,13 @@ public:
           , std::string const &  facility_ident = "");
 
 
-    Trace     trace   (std::string const &  session_ident = "");
-    Debug     debug   (std::string const &  session_ident = "");
-    Info      info    (std::string const &  session_ident = "");
-    Warning   warning (std::string const &  session_ident = "");
-    Error     error   (std::string const &  session_ident = "");
-    Critical  critical(std::string const &  session_ident = "");
-    Fatal     fatal   (std::string const &  session_ident = "");
+    Trace     trace   (std::string const &  session_ident = "") const;
+    Debug     debug   (std::string const &  session_ident = "") const;
+    Info      info    (std::string const &  session_ident = "") const;
+    Warning   warning (std::string const &  session_ident = "") const;
+    Error     error   (std::string const &  session_ident = "") const;
+    Critical  critical(std::string const &  session_ident = "") const;
+    Fatal     fatal   (std::string const &  session_ident = "") const;
 
 
 private:

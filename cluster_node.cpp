@@ -7,9 +7,9 @@ namespace cluster    {
 
 // =============================================================================
 
-Node::Node(unsigned  id, unsigned  units)
-    : units(units)
-    , id_(id)
+Node::Node()
+    : units(0)
+    , id(static_cast<unsigned>(-1))
 {
 }
 
@@ -17,13 +17,6 @@ Node::Node(unsigned  id, unsigned  units)
 
 Node::~Node()
 {
-}
-
-// -----------------------------------------------------------------------------
-
-unsigned  Node::id() const
-{
-    return id_;
 }
 
 // =============================================================================

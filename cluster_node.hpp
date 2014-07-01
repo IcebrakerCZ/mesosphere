@@ -12,30 +12,17 @@ namespace cluster    {
 
 // =============================================================================
 
-
 class Node
 {
 public:
 
-    /* Every node must have its unique ID and available job units */
-    Node(unsigned  id, unsigned  units);
-
+    Node();
     ~Node();
 
 
-    unsigned  id() const;
-
-
-public:
-
     unsigned  units;
-
-
-private:
-
-    unsigned  id_;
+    unsigned  id;
 }; // class node
-
 
 // =============================================================================
 

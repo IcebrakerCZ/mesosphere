@@ -8,7 +8,7 @@ namespace cluster    {
 // =============================================================================
 
 Job::Job(unsigned long long  id, unsigned  units)
-    : units(units)
+    : units_(units)
     , id_(id)
 {
 }
@@ -24,6 +24,13 @@ Job::~Job()
 unsigned long long  Job::id() const
 {
     return id_;
+}
+
+// -----------------------------------------------------------------------------
+
+unsigned  Job::units() const
+{
+    return units_;
 }
 
 // =============================================================================

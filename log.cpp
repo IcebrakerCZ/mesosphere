@@ -32,49 +32,49 @@ Module::Module( std::string const &  facility_name
 
 // -----------------------------------------------------------------------------
 
-Trace  Module::trace(std::string const &  session_ident)
+Trace  Module::trace(std::string const &  session_ident) const
 {
     return Trace(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Debug  Module::debug(std::string const &  session_ident)
+Debug  Module::debug(std::string const &  session_ident) const
 {
     return Debug(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Info  Module::info(std::string const &  session_ident)
+Info  Module::info(std::string const &  session_ident) const
 {
     return Info(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Warning  Module::warning(std::string const &  session_ident)
+Warning  Module::warning(std::string const &  session_ident) const
 {
     return Warning(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Error  Module::error(std::string const &  session_ident)
+Error  Module::error(std::string const &  session_ident) const
 {
     return Error(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Critical  Module::critical(std::string const &  session_ident)
+Critical  Module::critical(std::string const &  session_ident) const
 {
     return Critical(facility_name_, facility_ident_, session_ident);
 }
 
 // -----------------------------------------------------------------------------
 
-Fatal  Module::fatal(std::string const &  session_ident)
+Fatal  Module::fatal(std::string const &  session_ident) const
 {
     return Fatal(facility_name_, facility_ident_, session_ident);
 }
