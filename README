@@ -78,3 +78,5 @@ From my point of view it is better to implement solution (1) now.
 
 Everytime bigger job comes to the beginning of the queue one node
 is saved for it.
+
+A
