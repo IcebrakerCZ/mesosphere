@@ -1,0 +1,80 @@
+Input resources in form (node units):
+
+(2 3) (7 1) (1 23) (8 5) (2 8)
+
+
+Input jobs in form (job units):
+
+(3 4) (1 4) (4 7) (1 3) (5 4) (9 3)
+
+
+
+Question: What the unit mean? How is it counted?
+          Is it just hardware resource consumption as CPU or Memory
+          or is there counted time complexity and is there counted
+          if it can be processed on many cores in parallel?
+
+
+Issue:
+
+FIFO - worst case will be when huge job will come and all nodes will be finishing
+       small jobs so free processing units will grow slowly over the nodes
+       and all nodes will have almost the same processing units grow
+
+       In the end all nodes will be able to process the huge job so it will be sent
+       to one node and job processing will run normally again.
+
+       Huge job will result in a bottleneck and cluster will hiccups :)
+
+
+Solutions:
+
+1) When bigger job comes to the job queue save some node for it
+   so no other task will be sent to the saved node until the bigger task
+   is sent for processing.
+
+    Positives - simple solution
+              - fast for development
+              - can be easily improved as solution (2)
+
+    Negatives - another node could have enough free units faster
+                than the saved node
+
+    Summary   - can be developed as quick fix before better solution
+                is designed
+
+
+2) Divide nodes to buckets where every bucket must be able to process
+   bigger jobs in short time.
+
+   So for example 25% of nodes will be free to do every small job.
+   Next 25% will be reserved for medium sized jobs next 25% of nodes
+   will be reserved to process big jobs and last 25% will be reserved
+   to process huge jobs.
+
+   The limits can be easily configurable so the nodes percentage
+   and what small/medium/big/huge job means can be configurable too.
+
+   On top of that a cluster stats will be counted so the nodes percentage
+   and jobs difficulty can be update in runtime and can be even predicted
+   based on date time as peaks occures periodically.
+
+
+3) Count to the job units even how long they are in the queue already
+   so even smaller jobs can be processed before bigger jobs
+   when the bigger job blocks the queue.
+
+    Positives - the system will process new jobs even the queue is blocked
+
+    Negatives - it must be counted and proved precisely how the algorithm
+                will behave
+
+    Summary   - better solution, but the system will still have hiccups
+                much smaller than in FIFO scenario but still it will hiccups
+
+
+
+From my point of view it is better to implement solution (1) now.
+
+Everytime bigger job comes to the beginning of the queue one node
+is saved for it.
