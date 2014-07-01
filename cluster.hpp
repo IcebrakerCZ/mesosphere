@@ -26,7 +26,7 @@ class Cluster
 {
 public:
 
-    Cluster();
+    Cluster(std::string const &  name = "cluster");
     virtual ~Cluster();
 
 
@@ -40,27 +40,24 @@ public:
 /* Note: made protected from private just to support unit testing */
 protected:
 
-    void  add_node(unsigned  id, unsigned  units);
-    void  add_job (unsigned  id, unsigned  units);
-
     /* Main logic */
-    void  changed();
+    virtual void  add_node(unsigned  id, unsigned  units);
+    virtual void  add_job (unsigned  id, unsigned  units);
+    virtual void  changed ();
 
     /* Send job to node */
-    void  process_job(Node &  node, Job &  job);
+    virtual void  process_job(Node &  node, Job &  job);
 
     void  print_nodes() const;
     void  print_jobs () const;
     void  print_stats() const;
 
 
-private:
-
     /* Function just for unit testing cluster logic inside the framework */
     virtual void  work();
 
 
-private:
+protected:
 
     boost::mutex              mutex_;
     std::map<unsigned, Node>  nodes_;

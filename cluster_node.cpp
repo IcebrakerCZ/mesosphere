@@ -10,6 +10,7 @@ namespace cluster    {
 Node::Node()
     : units(0)
     , id(static_cast<unsigned>(-1))
+    , job(NULL)
 {
 }
 

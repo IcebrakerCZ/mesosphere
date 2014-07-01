@@ -11,8 +11,8 @@ namespace cluster    {
 
 // =============================================================================
 
-Cluster::Cluster()
-    : mesosphere::service::Module("cluster")
+Cluster::Cluster(std::string const &  name)
+    : mesosphere::service::Module(name)
 {
     log_.trace() << "Constructor";
 }
@@ -157,13 +157,17 @@ void  Cluster::changed()
         }
     }
 
-    /* Send job to node and update the node available units
-     * and remove the job from pending jobs list
-     */
-    process_job(*node, job);
+    if (node == NULL) {
+        log_.info() << "No suitable node found for job " << job.id();
+    } else {
+        /* Send job to node and update the node available units
+         * and remove the job from pending jobs list
+         */
+        process_job(*node, job);
 
-    jobs_.erase(jobs_.begin());
-    node->units -= job.units();
+        jobs_.erase(jobs_.begin());
+        node->units -= job.units();
+    }
 
     print_nodes();
     print_jobs();

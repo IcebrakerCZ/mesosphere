@@ -3,6 +3,10 @@
 
 // =============================================================================
 
+#include "cluster_job.hpp"
+
+#include <boost/shared_ptr.hpp>
+
 #include <string>
 
 // =============================================================================
@@ -20,8 +24,9 @@ public:
     ~Node();
 
 
-    unsigned  units;
-    unsigned  id;
+    unsigned                units;
+    unsigned                id;
+    boost::shared_ptr<Job>  job;
 }; // class node
 
 // =============================================================================
