@@ -1,4 +1,4 @@
-#include "cluster.hpp"
+#include "cluster_new.hpp"
 
 #include <boost/foreach.hpp>
 
@@ -11,48 +11,22 @@ namespace cluster    {
 
 // =============================================================================
 
-Cluster::Cluster(std::string const &  name)
-    : mesosphere::service::Module(name)
+ClusterNew::ClusterNew()
+    : Cluster("cluster_new")
 {
     log_.trace() << "Constructor";
 }
 
 // -----------------------------------------------------------------------------
 
-Cluster::~Cluster()
+ClusterNew::~ClusterNew()
 {
     log_.trace() << "Destructor";
 }
 
 // -----------------------------------------------------------------------------
 
-bool  Cluster::configure(boost::program_options::options_description &  config)
-{
-    log_.trace() << "configure";
-    return true;
-}
-
-// -----------------------------------------------------------------------------
-
-bool  Cluster::start()
-{
-    log_.trace() << "start";
-
-    mesosphere::service::application.io_service().post(boost::bind(&Cluster::work, this));
-
-    return true;
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::stop()
-{
-    log_.trace() << "stop";
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::add_node(unsigned  id,  unsigned  units)
+void  ClusterNew::add_node(unsigned  id,  unsigned  units)
 {
     boost::mutex::scoped_lock  lock(mutex_);
 
@@ -64,73 +38,32 @@ void  Cluster::add_node(unsigned  id,  unsigned  units)
 
     node.units += units;
 
+    log_.debug() << "Have node " << node.id << " with " << node.units << " units";
+
+    if (node.job != NULL) {
+        log_.trace() << "Checking job " << node.job->id() << " with " << node.job->units() << " units"
+                     << " on saved node " << node.id << " with " << node.units << " units";
+
+        if (node.units >= node.job->units()) {
+            log_.trace() << "Processing job " << node.job->id() << " with " << node.job->units() << " units"
+                         << " on saved node " << node.id << " with " << node.units << " units";
+
+            process_job(node, *node.job);
+            node.units -= node.job->units();
+            node.job.reset();
+        }
+    }
+
     changed();
 }
 
 // -----------------------------------------------------------------------------
 
-void  Cluster::add_job(unsigned  id,  unsigned  units)
-{
-    boost::mutex::scoped_lock  lock(mutex_);
-
-    log_.debug() << "Adding job " << id << " with " << units << " units";
-
-    jobs_.push_back(Job(id, units));
-
-    ++(units_stats_.insert(std::make_pair(units, static_cast<unsigned long long>(0))).first->second);
-
-    changed();
-    print_stats();
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::work()
-{
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::process_job(Node &  node, Job &  job)
-{
-    log_.info() << "Sending job " << job.id() << " to node " << node.id;
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::print_nodes() const
-{
-    BOOST_FOREACH(auto  node_pair, nodes_) {
-        log_.debug() << "node " << node_pair.second.id
-                     << ": " << node_pair.second.units << " units";
-    }
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::print_jobs() const
-{
-    BOOST_FOREACH(auto  job, jobs_) {
-        log_.debug() << "job  " << job.id()
-                     << ": " << job.units() << " units";
-    }
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::print_stats() const
-{
-    BOOST_FOREACH(auto  unit_pair, units_stats_) {
-        log_.debug() << "unit " << unit_pair.first
-                     << ": " << unit_pair.second << " hits";
-    }
-}
-
-// -----------------------------------------------------------------------------
-
-void  Cluster::changed()
+void  ClusterNew::changed()
 {
     if (jobs_.empty()) {
+        print_nodes();
+        print_jobs();
         log_.debug() << "changed: No more jobs in queue";
         return;
     }
@@ -141,6 +74,13 @@ void  Cluster::changed()
     /* Find suitable node */
     std::map<unsigned, Node>::iterator  i_nodes = nodes_.begin();
     for (; i_nodes != nodes_.end(); ++i_nodes) {
+        /* Skip already saved nodes */
+        if (i_nodes->second.job != NULL) {
+            log_.trace() << "Skipping saved node " << i_nodes->second.id << " with job "
+                         << i_nodes->second.job->id();
+            continue;
+        }
+
         /* Check if there is enough available units at the node*/
         if (i_nodes->second.units >= job.units()) {
             /* But use node with availale units closest to job units */
@@ -159,6 +99,28 @@ void  Cluster::changed()
 
     if (node == NULL) {
         log_.info() << "No suitable node found for job " << job.id();
+
+        i_nodes = nodes_.begin();
+        for (; i_nodes != nodes_.end(); ++i_nodes) {
+            /* Skip already saved node */
+            if (i_nodes->second.job != NULL) {
+                log_.trace() << "Skipping saved node " << i_nodes->second.id << " with job "
+                             << i_nodes->second.job->id();
+                continue;
+            }
+
+            node = &i_nodes->second;
+            break;
+        }
+
+        /* Save a node for bigger job if we stll have spare node to use */
+        if (node != NULL) {
+            node->job.reset(new Job(job));
+            jobs_.erase(jobs_.begin());
+
+            log_.trace() << "Saved job " << node->job->id() << " with " << node->job->units() << " units"
+                         << " on node " << node->id << " with " << node->units << " units";
+        }
     } else {
         /* Send job to node and update the node available units
          * and remove the job from pending jobs list
